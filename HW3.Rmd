@@ -1,0 +1,97 @@
+---
+title: "HW3"
+author: "Ziran Xu"
+date: "2019/2/16"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q
+Monte Carlo simulation:
+  St = S0 * exp((r-sigma^2/2)*dt+sigma*epsilon*sqrt(dt))
+```{r}
+k=34;s0=30;q=0.05;r=0.05;sigma=0.25;T=0.5;N1=1000;N2=5000;N3=10000
+S_one = matrix(NA,ncol=1,nrow =N1)
+S_two = matrix(NA,ncol=1,nrow =N2)
+S_three = matrix(NA,ncol=1,nrow =N3)
+rnd = matrix(rnorm(N3),ncol=1,nrow = N3)
+for(i in 1:N1)
+{
+  S_one[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+}
+for(i in 1:N2)
+{
+  S_two[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+}
+for(i in 1:N3)
+{
+  S_three[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+}
+sampleprices_one = 1:N1;sampleprices_two = 1:N2;sampleprice_three=1:N3
+for(i in 1:N1)
+{
+  sampleprices_one[i] = max(0,S_one[i,1]-k)*exp(-r*T)
+}
+for(i in 1:N2)
+{
+  sampleprices_two[i] = max(0,S_two[i,1]-k)*exp(-r*T)
+}
+for(i in 1:N3)
+{
+  sampleprice_three[i] = max(0,S_three[i,1]-k)*exp(-r*T)
+}
+
+Callprice_one = mean(sampleprices_one)
+Callprice_two = mean(sampleprices_two)
+Callprice_three = mean(sampleprice_three)
+cat("The price for 1000 samples is",Callprice_one," The price for 5000 samples is",Callprice_two," The price for 10000 samples is",Callprice_three)
+Var_one = var(sampleprices_one);Var_two = var(sampleprices_two);Var_three =var(sampleprice_three)
+cat("\n\nThe variance are ",Var_one,Var_two,Var_three,"separately")
+
+```
+  Antithetic variables
+```{r}
+k=34;s0=30;q=0.05;r=0.05;sigma=0.25;T=0.5;N1=1000;N2=5000;N3=10000
+Anti_S_one = matrix(NA,ncol=1,nrow =N1*2)
+Anti_S_two = matrix(NA,ncol=1,nrow =N2*2)
+Anti_S_three = matrix(NA,ncol=1,nrow =N3*2)
+for(i in 1:N1)
+{
+  Anti_S_one[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+  Anti_S_one[i+N1,1]=s0*exp(((r-q)-sigma^2/2)*T+sigma*(-rnd[i,1])*sqrt(T))
+}
+for(i in 1:N2)
+{
+  Anti_S_two[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+  Anti_S_two[i+N2,1]= s0*exp(((r-q)-sigma^2/2)*T+sigma*(-rnd[i,1])*sqrt(T))
+}
+for(i in 1:N3)
+{
+  Anti_S_three[i,1] = s0*exp(((r-q)-sigma^2/2)*T+sigma*rnd[i,1]*sqrt(T))
+  Anti_S_three[i+N3,1]= s0*exp(((r-q)-sigma^2/2)*T+sigma*(-rnd[i,1])*sqrt(T))
+}
+Anti_sampleprices_one = 1:(N1);Anti_sampleprices_two = 1:(N2);Anti_sampleprice_three=1:(N3)
+for(i in 1:N1)
+{
+  Anti_sampleprices_one[i] = (max(0,Anti_S_one[i,1]-k)*exp(-r*T)+max(0,Anti_S_one[i+N1,1]-k)*exp(-r*T))/2
+}
+for(i in 1:N2)
+{
+  Anti_sampleprices_two[i] = (max(0,Anti_S_two[i,1]-k)*exp(-r*T)+max(0,Anti_S_two[i+N2,1]-k)*exp(-r*T))/2
+   
+}
+for(i in 1:N3)
+{
+  Anti_sampleprice_three[i] = (max(0,Anti_S_three[i,1]-k)*exp(-r*T)+max(0,Anti_S_three[i+N3,1]-k)*exp(-r*T))/2
+   
+}
+
+Anti_Var_one = var(Anti_sampleprices_one);Anti_Var_two = var(Anti_sampleprices_two);Anti_Var_three =var(Anti_sampleprice_three)
+cat("\nThe variance are ",Anti_Var_one,Anti_Var_two,Anti_Var_three,"separately after Antithetic variables")
+```
